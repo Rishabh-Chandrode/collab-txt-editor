@@ -1,29 +1,50 @@
-const {WebSocketServer} = require('ws');
-
-let wss;
-
+const { WebSocketServer } = require('ws');
+const db = require('./database');
 
 function initWS(server) {
+  const wss = new WebSocketServer({ server });
 
-    wss = new WebSocketServer({ server });
+  wss.on('connection', async (ws) => {
+    console.log('🔌 New Client Connected');
 
-    wss.on('connection' ,(ws) => {
-        console.log('✅ WebSocket Server initialized');
+    try {
+      const allChars = await db.getAllCharacters();
+      ws.send(JSON.stringify({ 
+        type: 'SYNC', 
+        data: allChars 
+      }));
+    } catch (err) {
+      console.error('❌ Sync Error:', err);
+    }
 
-        ws.on('message', (message) => {
-            wss.clients.forEach((client) => {
-                if (client !==ws && client.readyState === 1) {
-                    client.send(message);
-                }
-            })
-        })
 
-        ws.on('close', () => {
-            console.log('❌ WebSocket connection closed');
+    ws.on('message', (message) => {
+      try {
+        const parsedMsg = JSON.parse(message);
+        
+        
+        if (parsedMsg.type === 'INSERT') {
+          db.insertCharacter(parsedMsg.data);
+        } else if (parsedMsg.type === 'DELETE') {
+          db.deleteCharacter(parsedMsg.data.position);
+        }
+
+        
+        wss.clients.forEach((client) => {
+          if (client !== ws && client.readyState === 1) {
+            client.send(JSON.stringify(parsedMsg));
+          }
         });
 
-    })
-    
+      } catch (err) {
+        console.error('❌ Message Error:', err);
+      }
+    });
+
+    ws.on('close', () => console.log('❌ Client Disconnected'));
+  });
+
+  console.log('✅ WebSocket Server initialized');
 }
 
 module.exports = initWS;
