@@ -35,7 +35,7 @@ class LocalState {
 	}
 
 	sort() {
-		this.#state.sort((a, b) => a.position.localeCompare(b.position));
+		this.#state.sort((a, b) => (a.position > b.position) ? 1 : -1);
 	}
 
 	getByIndex(index) {

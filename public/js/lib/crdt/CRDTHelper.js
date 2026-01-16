@@ -4,6 +4,10 @@ import { ws } from "../../webSocket.js";
 import { CRDT } from "./CRDT.js";
 
 
+const MIN_ID_RANGE = '!';
+const MAX_ID_RANGE = '~';
+
+
 export function handleInsert(newText, oldText, cursorIndex) {
 
     const charIndex = cursorIndex - 1;
@@ -47,11 +51,14 @@ export function handleDelete(newText, oldText) {
 }
 
 function generatePosition(prevPos, nextPos) {
-    if (!prevPos && !nextPos) return '5';
-    if (!prevPos) return findBetween('0', nextPos);
+    if (!prevPos && !nextPos) {
+        const midAscii = Math.floor((MIN_ID_RANGE.charCodeAt(0) + MAX_ID_RANGE.charCodeAt(0)) / 2);
+        return String.fromCharCode(midAscii);
+    }
+    if (!prevPos) return findBetween(MIN_ID_RANGE, nextPos);
 
     // ASCII after '9' is ':'
-    if (!nextPos) return findBetween(prevPos, ':');
+    if (!nextPos) return findBetween(prevPos, MAX_ID_RANGE);
 
     return findBetween(prevPos, nextPos);
 }
@@ -63,8 +70,8 @@ function findBetween(pos1, pos2) {
    let newPos = '';
 
    while(true) {
-        let leftChar = (i < pos1.length) ? pos1.charAt(i) : '0';
-        let rightChar = (i < pos2.length) ? pos2.charAt(i) : ':';
+        let leftChar = (i < pos1.length) ? pos1.charAt(i) : MIN_ID_RANGE;
+        let rightChar = (i < pos2.length) ? pos2.charAt(i) : MAX_ID_RANGE;
 
         if (leftChar === rightChar) {
             i++;
