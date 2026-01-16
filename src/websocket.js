@@ -25,16 +25,21 @@ function initWS(server) {
         
         if (parsedMsg.type === 'INSERT') {
           db.insertCharacter(parsedMsg.data);
+          broadcast(parsedMsg);
         } else if (parsedMsg.type === 'DELETE') {
           db.deleteCharacter(parsedMsg.data.position);
+          broadcast(parsedMsg);
+        } else if (parsedMsg.type === 'CURSOR') {
+          broadcast(parsedMsg);
         }
 
-        
-        wss.clients.forEach((client) => {
-          if (client !== ws && client.readyState === 1) {
-            client.send(JSON.stringify(parsedMsg));
-          }
-        });
+        function broadcast(msg) {
+          wss.clients.forEach((client) => {
+            if (client !== ws && client.readyState === 1) {
+              client.send(JSON.stringify(msg));
+            }
+          });
+        }
 
       } catch (err) {
         console.error('❌ Message Error:', err);

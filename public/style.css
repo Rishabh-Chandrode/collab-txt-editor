@@ -64,3 +64,49 @@ h1 {
     outline: none;
     font-family: 'Courier New', Courier, monospace;
 }
+
+
+.container {
+    position: relative; 
+}
+
+.remote-cursor {
+    position: absolute;
+    width: 2px;
+    height: 24px; 
+    background-color: #ff007c; 
+    pointer-events: none;
+    transition: all 0.1s ease;
+    z-index: 10;
+}
+
+.remote-cursor::after {
+    content: attr(data-label); 
+    position: absolute;
+    top: -20px;
+    left: -2px;
+    background-color: #ff007c;
+    color: white;
+    font-size: 10px;
+    padding: 2px 4px;
+    border-radius: 3px;
+    white-space: nowrap;
+}
+
+#mirror-div {
+    position: absolute;
+    top: 55px; 
+    left: 0;
+    visibility: hidden; 
+    white-space: pre-wrap; 
+    word-wrap: break-word;
+    pointer-events: none;
+    
+    
+    width: 100%;
+    padding: 40px;
+    font-size: 16px;
+    line-height: 1.6;
+    font-family: 'Courier New', Courier, monospace;
+    box-sizing: border-box;
+}
