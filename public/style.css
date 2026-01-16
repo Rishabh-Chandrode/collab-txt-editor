@@ -1,0 +1,66 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f4f4f9;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    height: 100vh;
+}
+
+.container {
+    width: 800px;
+    background: white;
+    box-shadow: 0 0 20px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column;
+    height: 90vh;
+    margin-top: 20px;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+header {
+    background-color: #2c3e50;
+    color: white;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+h1 {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 500;
+}
+
+/* Status Indicator (Green/Red) */
+.status {
+    font-size: 0.8rem;
+    padding: 5px 10px;
+    border-radius: 12px;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.status.connected {
+    background-color: #27ae60;
+    color: white;
+}
+
+.status.disconnected {
+    background-color: #c0392b;
+    color: white;
+}
+
+/* The Typing Area */
+#editor {
+    flex-grow: 1;
+    border: none;
+    resize: none; /* Disable manual resizing */
+    padding: 40px;
+    font-size: 16px;
+    line-height: 1.6;
+    outline: none;
+    font-family: 'Courier New', Courier, monospace;
+}
