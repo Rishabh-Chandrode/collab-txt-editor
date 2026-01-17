@@ -25,7 +25,14 @@ export function handleEventListeners() {
 		}
 	});
 
-    handleCursorEvents();
+	//disable paste for now
+	editor.addEventListener("paste", (e) => {
+		e.preventDefault(); // This stops the text from appearing
+		console.log("Paste is currently disabled.");
+		alert("Pasting is disabled for now!");
+	});
+
+	handleCursorEvents();
 }
 
 export function updateOnlineStatus(isOnline) {

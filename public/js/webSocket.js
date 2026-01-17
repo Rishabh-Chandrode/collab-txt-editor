@@ -3,7 +3,8 @@ import { render, updateOnlineStatus } from "./dom.js";
 import { CRDT } from "./lib/crdt/CRDT.js";
 import { localState } from "./state.js";
 
-export const ws = new WebSocket("ws://localhost:5000");
+// export const ws = new WebSocket("ws://localhost:5000");
+export const ws = new WebSocket("ws://192.168.100.125:5000");
 
 export function initWebSocket() {
 
