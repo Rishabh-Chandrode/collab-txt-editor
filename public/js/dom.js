@@ -1,5 +1,7 @@
 import { handleCursorEvents } from "./cursor.js";
-import { handleDelete, handleInsert } from "./lib/crdt/CRDTHelper.js";
+import {
+	handleInputChange,
+} from "./lib/crdt/CRDTHelper.js";
 import { localState } from "./state.js";
 
 export const container = document.getElementById("container");
@@ -12,25 +14,16 @@ export const mySiteId = "User-" + Math.floor(Math.random() * 1000);
 export function handleEventListeners() {
 	editor.addEventListener("input", (event) => {
 		const newText = event.target.value;
-
 		const oldText = localState.text;
-
-		const cursorStart = event.target.selectionStart;
-		const cursorEnd = event.target.selectionEnd;
-
-		if (newText.length > oldText.length) {
-			handleInsert(newText, oldText, cursorStart);
-		} else {
-			handleDelete(newText, oldText);
-		}
+		handleInputChange(newText, oldText);
 	});
 
 	//disable paste for now
-	editor.addEventListener("paste", (e) => {
-		e.preventDefault(); // This stops the text from appearing
-		console.log("Paste is currently disabled.");
-		alert("Pasting is disabled for now!");
-	});
+	// editor.addEventListener("paste", (e) => {
+	// 	e.preventDefault(); // This stops the text from appearing
+	// 	console.log("Paste is currently disabled.");
+	// 	alert("Pasting is disabled for now!");
+	// });
 
 	handleCursorEvents();
 }

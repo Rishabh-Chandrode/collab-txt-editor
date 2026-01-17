@@ -1,3 +1,5 @@
+import { MAX_CHAR_POS, MIN_CHAR_POS } from "./lib/crdt/CRDTHelper.js";
+
 class LocalState {
 
     #state;
@@ -18,8 +20,8 @@ class LocalState {
 		return this.#state.map((char) => char.value).join("");
 	}
 
-	insert(index, item) {
-		this.#state.splice(index, 0, item);
+	insert(index, items) {
+		this.#state.splice(index, 0, ...items);
 	}
 
 	push(item) {
@@ -44,8 +46,11 @@ class LocalState {
         this.#state = this.#state.filter(callback);
     }
 
-	delete(index) {
-		this.#state.splice(index, 1);
+	
+
+	delete(startIndex, length) {
+		if (!length) length = 1;
+		return this.#state.splice(startIndex, length);
 	}
 
 	sort() {
@@ -53,7 +58,26 @@ class LocalState {
 	}
 
 	getByIndex(index) {
+		if (index < 0 || index >= this.#state.length){
+			throw new Error("Index out of bounds");
+		}
 		return this.#state[index];
+	}
+
+	getPrevCharPos(index) {
+		index = Math.min(index, this.#state.length);
+		if (index-1 < 0) {
+			return MIN_CHAR_POS;
+		}
+		return this.#state[index - 1].position;
+	}
+
+	getNextCharPos(index) {
+		index = Math.max(index, 0);
+		if (index >= this.#state.length) {
+			return MAX_CHAR_POS;
+		}
+		return this.#state[index].position;
 	}
 }
 

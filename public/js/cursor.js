@@ -1,5 +1,5 @@
 import { cursorLayer, mirrorDiv, mySiteId } from "./dom.js";
-import { ws } from "./webSocket.js";
+import { sendMessage } from "./webSocket.js";
 
 export function handleCursorEvents() {
 	document.addEventListener("selectionchange", () => {
@@ -8,12 +8,10 @@ export function handleCursorEvents() {
 		const start = editor.selectionStart;
 		const end = editor.selectionEnd;
 
-		ws.send(
-			JSON.stringify({
-				type: "CURSOR",
-				data: { sideId: mySiteId, cursorIndex: start },
-			})
-		);
+		sendMessage({
+			type: "CURSOR",
+			data: { sideId: mySiteId, cursorIndex: start },
+		});
 	});
 }
 

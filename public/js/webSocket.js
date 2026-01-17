@@ -3,8 +3,10 @@ import { render, updateOnlineStatus } from "./dom.js";
 import { CRDT } from "./lib/crdt/CRDT.js";
 import { localState } from "./state.js";
 
-// export const ws = new WebSocket("ws://localhost:5000");
-export const ws = new WebSocket("ws://192.168.100.125:5000");
+const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+const host = window.location.host; 
+
+export const ws = new WebSocket(`${protocol}://${host}`);
 
 export function initWebSocket() {
 
@@ -33,12 +35,18 @@ function handleMessage(message) {
 			render();
 			break;
 		case "INSERT":
-			const char = new CRDT(message.data.value, message.data.position, message.data.siteId);
-			localState.sortedPush(char);
+			const data = message.data;
+			const char = new CRDT(data.value, data.position, data.siteId);
+			localState.push(char);
+			localState.sort();
 			render();
 			break;
+			
 		case "DELETE":
-            localState.filter((char) => char.position !== message.data.position);
+			const {  position } = message.data;
+            localState.filter((char) => {
+				return char.position !== position;
+			})
 			render();
 			break;
 		case "CURSOR":
@@ -47,4 +55,8 @@ function handleMessage(message) {
 	}
 
 	render();
+}
+
+export function sendMessage(message) {
+	ws.send(JSON.stringify(message));
 }

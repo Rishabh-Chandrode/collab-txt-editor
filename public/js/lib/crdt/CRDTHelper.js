@@ -1,96 +1,121 @@
 import { mySiteId } from "../../dom.js";
 import { localState } from "../../state.js";
-import { ws } from "../../webSocket.js";
+import { sendMessage } from "../../webSocket.js";
 import { CRDT } from "./CRDT.js";
 
+export const MIN_CHAR_POS = "!";
+export const MAX_CHAR_POS = "~";
 
-const MIN_ID_RANGE = '!';
-const MAX_ID_RANGE = '~';
+export function handleInputChange(newText, oldText) {
+	let i = 0;
+    console.log('newText:', newText);
+    console.log('oldText:', oldText);
+	while (i < newText.length) {
+		if (newText[i] !== oldText[i]) {
+			break;
+		} else {
+			i++;
+		}
+	}
+	const diffStartIndex = i;
+    console.log('diffStartIndex:', diffStartIndex);
 
+	let newTextDiffEndIndex = newText.length - 1;
+	let oldTextDiffEndIndex = oldText.length - 1;
+	while (
+		newTextDiffEndIndex >= 0 &&
+		oldTextDiffEndIndex >= 0 &&
+		oldTextDiffEndIndex >= diffStartIndex
+	) {
+		if (newText[newTextDiffEndIndex] !== oldText[oldTextDiffEndIndex]) {
+			break;
+		} else {
+			newTextDiffEndIndex--;
+			oldTextDiffEndIndex--;
+		}
+	}
 
-export function handleInsert(newText, oldText, cursorIndex) {
+	let diffLength;
+	if (diffStartIndex <= oldTextDiffEndIndex) {
+		diffLength = oldTextDiffEndIndex - diffStartIndex + 1;
+        console.log(diffStartIndex, localState);
+        const deletedChars = localState.delete(diffStartIndex, diffLength);
+        deletedChars.forEach(element => {
+            sendMessage({
+                type: "DELETE",
+                data: {
+                    docId: "main",
+                    position: element.position,
+                }
+            });
+        });
+	}
 
-    const charIndex = cursorIndex - 1;
-    const charValue = newText.charAt(charIndex);
+	if (diffStartIndex <= newTextDiffEndIndex) {
+		diffLength = newTextDiffEndIndex - diffStartIndex + 1;
 
-    const prevChar = localState.getByIndex(charIndex - 1);
-    const nextChar = localState.getByIndex(charIndex);
+		let prevCharPos = localState.getPrevCharPos(diffStartIndex);
+		let nextCharPos = localState.getNextCharPos(diffStartIndex);
+		let charsToAdd = [];
+        i = diffStartIndex;
+        
+		while (diffLength--) {
+            const newPos = generatePosition(prevCharPos, nextCharPos);
+			const newCRDTObject = new CRDT(newText.charAt(i), newPos, mySiteId);
+            localState.sortedPush(newCRDTObject);
+			sendMessage({
+                type: "INSERT",
+				data: newCRDTObject.toJSON()
+			});
+            prevCharPos = newPos;
+            i++
+		}
 
-    const prevPos = prevChar ? prevChar.position : null;
-    const nextPos = nextChar ? nextChar.position : null;
-
-    const newPos = generatePosition(prevPos, nextPos);
-
-    const newCRDTObject = new CRDT(charValue, newPos, mySiteId);
-
-    localState.insert(charIndex, newCRDTObject);
-
-    ws.send(JSON.stringify({
-        type: 'INSERT',
-        data: newCRDTObject.toJSON()
-    }));
-
+	}
 }
 
-export function handleDelete(newText, oldText) {
-    let diffIndex = 0;
-    while (diffIndex < newText.length && newText[diffIndex] === oldText[diffIndex]) {
-        diffIndex++;
-    }
-
-    const charToDelete = localState.getByIndex(diffIndex);
-
-    if (charToDelete) {
-        localState.delete(diffIndex);
-
-        ws.send(JSON.stringify({
-            type: 'DELETE',
-            data: { position: charToDelete.position }
-        }));
-    }
-}
 
 function generatePosition(prevPos, nextPos) {
-    if (!prevPos && !nextPos) {
-        const midAscii = Math.floor((MIN_ID_RANGE.charCodeAt(0) + MAX_ID_RANGE.charCodeAt(0)) / 2);
-        return String.fromCharCode(midAscii);
-    }
-    if (!prevPos) return findBetween(MIN_ID_RANGE, nextPos);
+	if (!prevPos && !nextPos) {
+		const midAscii = Math.floor(
+			(MIN_CHAR_POS.charCodeAt(0) + MAX_CHAR_POS.charCodeAt(0)) / 2
+		);
+		return String.fromCharCode(midAscii);
+	}
+	if (!prevPos) return findBetween(MIN_CHAR_POS, nextPos);
 
-    // ASCII after '9' is ':'
-    if (!nextPos) return findBetween(prevPos, MAX_ID_RANGE);
+	// ASCII after '9' is ':'
+	if (!nextPos) return findBetween(prevPos, MAX_CHAR_POS);
 
-    return findBetween(prevPos, nextPos);
+	return findBetween(prevPos, nextPos);
 }
 
-
 function findBetween(pos1, pos2) {
+	let i = 0;
+	let newPos = "";
 
-   let i = 0;
-   let newPos = '';
+	while (true) {
+		let leftChar = i < pos1.length ? pos1.charAt(i) : MIN_CHAR_POS;
+		let rightChar = i < pos2.length ? pos2.charAt(i) : MAX_CHAR_POS;
 
-   while(true) {
-        let leftChar = (i < pos1.length) ? pos1.charAt(i) : MIN_ID_RANGE;
-        let rightChar = (i < pos2.length) ? pos2.charAt(i) : MAX_ID_RANGE;
+		if (leftChar === rightChar) {
+			i++;
+			newPos += leftChar;
+			continue;
+		}
 
-        if (leftChar === rightChar) {
-            i++;
-            newPos += leftChar;
-            continue;
-        }
+		let leftCharAscii = leftChar.charCodeAt(0);
+		let rightCharAscii = rightChar.charCodeAt(0);
 
-        let leftCharAscii = leftChar.charCodeAt(0);
-        let rightCharAscii = rightChar.charCodeAt(0);
+		if (rightCharAscii - leftCharAscii > 1) {
+			let mid = Math.floor((leftCharAscii + rightCharAscii) / 2);
+			newPos += String.fromCharCode(mid);
+			break;
+		} else {
+			newPos += leftChar;
+			i++;
+		}
+	}
 
-        if (rightCharAscii - leftCharAscii > 1) {
-            let mid = Math.floor((leftCharAscii + rightCharAscii) / 2);
-            newPos += String.fromCharCode(mid);
-            break;
-        }else {
-            newPos += leftChar;
-            i++;
-        }    
-   }
-
-   return newPos;
+	return newPos;
 }
