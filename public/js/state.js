@@ -26,6 +26,20 @@ class LocalState {
 		this.#state.push(item);
 	}
 
+	sortedPush(item) {
+		if (this.#state.length === 0 || this.#state[this.#state.length - 1].position < item.position) {
+			this.#state.push(item);
+			return;
+		}
+
+		for (const char of this.#state) {
+			if (char.position > item.position) {
+				this.#state.splice(this.#state.indexOf(char), 0, item);
+				return;
+			}
+		}
+	}
+
     filter(callback) {
         this.#state = this.#state.filter(callback);
     }

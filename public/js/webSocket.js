@@ -28,18 +28,17 @@ function handleMessage(message) {
                 const char = new CRDT(element.value, element.position, element.siteId);
                 localState.push(char);
             });
-            localState.sort();
-
-			editor.value = localState.text;
+			localState.sort();
+			render();
 			break;
 		case "INSERT":
-			localState.push(message.data);
-            localState.sort();
-			editor.value += message.data.value;
+			const char = new CRDT(message.data.value, message.data.position, message.data.siteId);
+			localState.sortedPush(char);
+			render();
 			break;
 		case "DELETE":
             localState.filter((char) => char.position !== message.data.position);
-			editor.value = localState.text;
+			render();
 			break;
 		case "CURSOR":
 			updateRemoteCursor(message.data);
