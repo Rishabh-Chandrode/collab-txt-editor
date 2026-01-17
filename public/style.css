@@ -73,8 +73,8 @@ h1 {
 .remote-cursor {
     position: absolute;
     width: 2px;
-    height: 24px; 
-    background-color: #ff007c; 
+    height: 18px; 
+    background-color: var(--cursor-color);
     pointer-events: none;
     transition: all 0.1s ease;
     z-index: 10;
@@ -85,7 +85,7 @@ h1 {
     position: absolute;
     top: -20px;
     left: -2px;
-    background-color: #ff007c;
+    background-color: var(--cursor-color);
     color: white;
     font-size: 10px;
     padding: 2px 4px;

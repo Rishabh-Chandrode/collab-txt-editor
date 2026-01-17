@@ -23,6 +23,11 @@ export function updateRemoteCursor(data) {
 		cursorElement.className = "remote-cursor";
 		cursorElement.setAttribute("data-sideId", data.sideId);
 		cursorElement.setAttribute("data-label", data.sideId);
+
+		const randomColorCode = Math.floor(Math.random() * 16777215)
+  .toString(16)
+  .padStart(6, "0");
+		cursorElement.style.setProperty("--cursor-color", `#${randomColorCode}`);
 		cursorLayer.appendChild(cursorElement);
 	}
 
