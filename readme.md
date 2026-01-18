@@ -8,6 +8,8 @@ Instead of using heavy libraries like Yjs or Socket.io, this project implements 
 
 🔗 **[Live Demo](https://coeditor-jjt8.onrender.com/)**
 
+![Project Demo](demo/demo.gif)
+
 ---
 
 ## 🚀 Key Features
