@@ -1,6 +1,7 @@
 # db
 /db
 /tmp
+*.db
 
 # Logs
 logs
