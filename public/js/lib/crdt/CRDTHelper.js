@@ -8,8 +8,6 @@ export const MAX_CHAR_POS = "~";
 
 export function handleInputChange(newText, oldText) {
 	let i = 0;
-    console.log('newText:', newText);
-    console.log('oldText:', oldText);
 	while (i < newText.length) {
 		if (newText[i] !== oldText[i]) {
 			break;
@@ -18,7 +16,6 @@ export function handleInputChange(newText, oldText) {
 		}
 	}
 	const diffStartIndex = i;
-    console.log('diffStartIndex:', diffStartIndex);
 
 	let newTextDiffEndIndex = newText.length - 1;
 	let oldTextDiffEndIndex = oldText.length - 1;
@@ -38,7 +35,6 @@ export function handleInputChange(newText, oldText) {
 	let diffLength;
 	if (diffStartIndex <= oldTextDiffEndIndex) {
 		diffLength = oldTextDiffEndIndex - diffStartIndex + 1;
-        console.log(diffStartIndex, localState);
         const deletedChars = localState.delete(diffStartIndex, diffLength);
         deletedChars.forEach(element => {
             sendMessage({
