@@ -42,7 +42,7 @@ function insertCharacter(char) {
 
   const {position, value, siteId} = char;
   if (!position || !value || !siteId) {
-    console.error("Invalid character data:", char);
+    console.error("Invalid character data when inserting :", char);
     return;
   }
 
@@ -54,10 +54,11 @@ function insertCharacter(char) {
 }
 
 function deleteCharacter(data) {
-  const  {position, docId} = data;
+  const  {char, docId} = data;
+  const {position, value, siteId} = char;
 
   if (!position || !docId) {
-    console.error("Invalid character data:", data);
+    console.error("Invalid character data when deleting :", data);
     return;
   }
 

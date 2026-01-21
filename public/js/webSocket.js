@@ -35,18 +35,19 @@ function handleMessage(message) {
 			render();
 			break;
 		case "INSERT":
-			const data = message.data;
-			const char = new CRDT(data.value, data.position, data.siteId);
-			localState.push(char);
-			localState.sort();
+			const charsToAddJSON = message.data.chars;
+			let charsToAdd = [];
+			charsToAddJSON.forEach(charJson => {
+				charsToAdd.push(new CRDT(charJson.value, charJson.position, charJson.siteId));
+			})
+			localState.merge(charsToAdd);
 			render();
 			break;
 			
 		case "DELETE":
-			const {  position } = message.data;
-            localState.filter((char) => {
-				return char.position !== position;
-			})
+			const charsToDelete = message.data.chars;
+			let charSet = new Set(charsToDelete.map(c => c.position));
+			localState.filter(char => !charSet.has(char.position));
 			render();
 			break;
 		case "CURSOR":
