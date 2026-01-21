@@ -81,13 +81,12 @@ By default, this app uses SQLite. On serverless/cloud platforms like Render, the
 
 ## 🔮 Future Improvements / Todo
 
-* [ ] **Batch Processing:** Implement message grouping to handle large copy/paste events (5000+ chars) without triggering network throttling.
-* [ ] **PostgreSQL Migration:** Move from SQLite to Postgres for permanent data storage.
-* [ ] **User Auth:** Add Login/Signup functionality.
-* [ ] **Multiple Documents:** Support routing for different room IDs (e.g., `/doc/123`).
-* [ ] **History:** Implement snapshotting for Undo/Redo functionality.
+- [x] **Batch Processing:** Batch text operations generated during large copy/paste events (5k+ chars) into size/time-based groups to prevent WebSocket flooding and network throttling.
+- [ ] **PostgreSQL Migration:** Move from SQLite to Postgres for permanent data storage.
+- [ ] **User Auth:** Add Login/Signup functionality.
+- [ ] **Multiple Documents:** Support routing for different room IDs (e.g., `/doc/123`).
+- [ ] **History:** Implement snapshotting for Undo/Redo functionality.
 
----
 
 ## 🤝 Contributing
 
