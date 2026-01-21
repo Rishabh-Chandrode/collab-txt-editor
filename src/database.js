@@ -38,35 +38,44 @@ function getAllCharacters(docId) {
 	});
 }
 
-function insertCharacter(char) {
+function insertCharacters(chars) {
+    db.serialize(() => {
+        db.run("BEGIN TRANSACTION");
 
-  const {position, value, siteId} = char;
-  if (!position || !value || !siteId) {
-    console.error("Invalid character data when inserting :", char);
-    return;
-  }
+        const stmt = db.prepare(
+            "INSERT OR REPLACE INTO characters (doc_id, position, value, site_id) VALUES (?, ?, ?, ?)"
+        );
 
-	const stmt = db.prepare(
-		"INSERT OR REPLACE INTO characters (doc_id, position, value, site_id) VALUES (?, ?, ?, ?)"
-	);
-	stmt.run("main", char.position, char.value, char.siteId);
-	stmt.finalize();
+        chars.forEach((char) => {
+            stmt.run("main", char.position, char.value, char.siteId);
+        });
+
+        stmt.finalize();
+
+        db.run("COMMIT", (err) => {
+            if (err) console.error("Transaction commit failed:", err);
+        });
+    });
 }
 
-function deleteCharacter(data) {
-  const  {char, docId} = data;
-  const {position, value, siteId} = char;
+function deleteCharacters(chars) {
+    db.serialize(() => {
+        db.run("BEGIN TRANSACTION");
 
-  if (!position || !docId) {
-    console.error("Invalid character data when deleting :", data);
-    return;
-  }
+        const stmt = db.prepare(
+            "DELETE FROM characters WHERE doc_id = ? AND position = ? AND site_id = ?"
+        );
 
-	const stmt = db.prepare(
-		"DELETE FROM characters WHERE doc_id = ? AND position = ?"
-	);
-	stmt.run(docId, position);
-	stmt.finalize();
+        chars.forEach((char) => {
+            stmt.run("main", char.position, char.siteId);
+        });
+
+        stmt.finalize();
+
+        db.run("COMMIT", (err) => {
+            if (err) console.error("Transaction commit failed:", err);
+        });
+    });
 }
 
-module.exports = { initDB, getAllCharacters, insertCharacter, deleteCharacter };
+module.exports = { initDB, getAllCharacters, insertCharacters, deleteCharacters };

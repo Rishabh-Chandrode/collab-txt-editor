@@ -1,46 +1,38 @@
-const { WebSocketServer } = require("ws");
-const db = require("./database");
-let docId = "main";
+const { WebSocketServer } = require('ws');
+const db = require('./database');
+let docId = 'main';
 
 function initWS(server) {
 	const wss = new WebSocketServer({ server });
 
-	wss.on("connection", async (ws) => {
-    console.log("New client connected");
+	wss.on('connection', async (ws) => {
+		console.log('New client connected');
 
 		try {
 			const allChars = await db.getAllCharacters(docId);
 			ws.send(
 				JSON.stringify({
-					type: "SYNC",
+					type: 'SYNC',
 					data: allChars,
-				})
+				}),
 			);
 		} catch (err) {
-			console.error("Sync Error:", err);
+			console.error('Sync Error:', err);
 		}
 
-		ws.on("message", (message) => {
+		ws.on('message', (message) => {
 			try {
 				const parsedMsg = JSON.parse(message);
-				if (parsedMsg.type === "INSERT") {
+				if (parsedMsg.type === 'INSERT') {
 					const chars = parsedMsg.data.chars;
-					console.log("message received at:", new Date().toLocaleTimeString());
-
 					broadcast(parsedMsg);
-					console.log("message broadcasted at:", new Date().toLocaleTimeString());
-
-					chars.forEach((char) => {
-						db.insertCharacter(char);
-					});
-				} else if (parsedMsg.type === "DELETE") {
+					db.insertCharacters(chars);
+				} else if (parsedMsg.type === 'DELETE') {
 					const chars = parsedMsg.data.chars;
 					const docId = parsedMsg.data.docId;
 					broadcast(parsedMsg);
-					chars.forEach((char) => {
-						db.deleteCharacter({char, docId});
-					});
-				} else if (parsedMsg.type === "CURSOR") {
+					db.deleteCharacters(chars);
+				} else if (parsedMsg.type === 'CURSOR') {
 					broadcast(parsedMsg);
 				}
 
@@ -52,11 +44,11 @@ function initWS(server) {
 					});
 				}
 			} catch (err) {
-				console.error("Message Error:", err);
+				console.error('Message Error:', err);
 			}
 		});
 
-		ws.on("close", () => console.log("Client Disconnected"));
+		ws.on('close', () => console.log('Client Disconnected'));
 	});
 }
 
