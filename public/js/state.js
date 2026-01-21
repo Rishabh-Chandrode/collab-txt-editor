@@ -79,6 +79,32 @@ class LocalState {
 		}
 		return this.#state[index].position;
 	}
+
+	merge(charsToAdd) {
+		charsToAdd.sort();
+		let i = 0,j =0;
+		let sortedChars = [];
+
+		while(i< this.#state.length && j < charsToAdd.length) {
+			if (this.#state[i].position < charsToAdd[j].position) {
+				sortedChars.push(this.#state[i]);
+				i++;
+			} else {
+				sortedChars.push(charsToAdd[j]);
+				j++;
+			}
+		}
+		while (i < this.#state.length) {
+			sortedChars.push(this.#state[i]);
+			i++;
+		}
+		while (j < charsToAdd.length) {
+			sortedChars.push(charsToAdd[j]);
+			j++;
+		}
+
+		this.#state = sortedChars;
+	}
 }
 
 export const localState = new LocalState();

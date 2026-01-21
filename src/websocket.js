@@ -23,13 +23,23 @@ function initWS(server) {
 		ws.on("message", (message) => {
 			try {
 				const parsedMsg = JSON.parse(message);
-
 				if (parsedMsg.type === "INSERT") {
-					db.insertCharacter(parsedMsg.data);
+					const chars = parsedMsg.data.chars;
+					console.log("message received at:", new Date().toLocaleTimeString());
+
 					broadcast(parsedMsg);
+					console.log("message broadcasted at:", new Date().toLocaleTimeString());
+
+					chars.forEach((char) => {
+						db.insertCharacter(char);
+					});
 				} else if (parsedMsg.type === "DELETE") {
-					db.deleteCharacter(parsedMsg.data);
+					const chars = parsedMsg.data.chars;
+					const docId = parsedMsg.data.docId;
 					broadcast(parsedMsg);
+					chars.forEach((char) => {
+						db.deleteCharacter({char, docId});
+					});
 				} else if (parsedMsg.type === "CURSOR") {
 					broadcast(parsedMsg);
 				}

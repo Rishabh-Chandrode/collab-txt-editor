@@ -36,15 +36,13 @@ export function handleInputChange(newText, oldText) {
 	if (diffStartIndex <= oldTextDiffEndIndex) {
 		diffLength = oldTextDiffEndIndex - diffStartIndex + 1;
         const deletedChars = localState.delete(diffStartIndex, diffLength);
-        deletedChars.forEach(element => {
-            sendMessage({
-                type: "DELETE",
-                data: {
-                    docId: "main",
-                    position: element.position,
-                }
-            });
-        });
+		sendMessage({
+			type: "DELETE",
+			data: {
+				docId: "main",
+				chars: deletedChars,
+			}
+		});
 	}
 
 	if (diffStartIndex <= newTextDiffEndIndex) {
@@ -53,19 +51,27 @@ export function handleInputChange(newText, oldText) {
 		let prevCharPos = localState.getPrevCharPos(diffStartIndex);
 		let nextCharPos = localState.getNextCharPos(diffStartIndex);
 		let charsToAdd = [];
+		let charsToAddJson = [];
         i = diffStartIndex;
         
 		while (diffLength--) {
             const newPos = generatePosition(prevCharPos, nextCharPos);
 			const newCRDTObject = new CRDT(newText.charAt(i), newPos, mySiteId);
-            localState.sortedPush(newCRDTObject);
-			sendMessage({
-                type: "INSERT",
-				data: newCRDTObject.toJSON()
-			});
+
+			charsToAdd.push(newCRDTObject);
+			charsToAddJson.push(newCRDTObject.toJSON());
+
             prevCharPos = newPos;
             i++
 		}
+		localState.insert(diffStartIndex, charsToAdd);
+		sendMessage({
+			type: "INSERT",
+			data: {
+				docId: "main",
+				chars: charsToAddJson
+			}
+		});
 
 	}
 }
